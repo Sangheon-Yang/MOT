@@ -20,7 +20,7 @@ from
 
 About the Project
 --------
-- Final Goal of thit project is to implement ```MOT``` 
+- Final Goal of this project is to implement ```MOT``` 
 
 - In order to implement ```MOT```, ```Object-Detection``` and ```Tracking``` need to be implemented sequentially.
 
