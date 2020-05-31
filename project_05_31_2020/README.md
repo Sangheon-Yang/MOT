@@ -75,20 +75,50 @@ About Tracking Algorithm Used in this Update
 
 
 
-Result
---------
-/Users/SangheonY/Desktop/result_MOT17_200.gif
-
-
-
-Conclusion & Further Step
+Result of Sample Test
 ----------------
 
-cpu만 사용,  속도, 정확성 문제가 너무 심함
+- dataset: ```./MOT17-03-DPM/img1/```    ```000001.jpg ~ 000200.jpg``` , 200 sequential imgs.
 
-cpu->gpu
+- result img files  in ```./MOT_out/ ```,  gif files in ```./gif_result/ ```
 
-ref Frame의 갯수를 더 늘려서 정확도를 개선하는 방향으로 구현해볼 예정
+gif
+
+
+
+
+
+Result Analysis
+-------------
+
+[ENGLISH]
+
+- Implementation was done by CPU Programming, So that it takes about 1 to 1.5 second per frame when processing Image. Since there are dozens of frames in a second of video, it will take a lot of times to handle video files.
+
+- Since we only use the information of Objects Deteced in Previous frame to grant the Object_id to the Objects Detected in Current frame, the accuracy of Tracking is tend to be really low. 
+
+[KOREAN]
+
+- CPU만 사용하는 방법으로 구현하였기 때문에 한개의 프레임당 1초~1.5초 정도의 처리 시간이 소모된다. 초당 수십개의 프레임을 처리해야 하는 동영상을 처리할 시 실제 동영상의 길이보다 수십배 더 긴 시간이 소모된다. 
+
+- 직전프레임에서 Detect된 물체들의 정보만 사용하여 현재 프레임에서 Detect된 물체들의 id를 부여하기 때문에 Tracking의 정확성이 매우 낮은 편이다.
+
+
+Further Step
+-------------
+
+[ENGLISH]
+
+- We are going to make it faster by using GPU-Programming(CUDA).
+
+- We are going to use not only Previous frame's Detection, but also few frames before it, so that we make some meaningful data out of them. This method would improve the accuracy of granting Object_id to appropriate Object, and it would be helpful for improving overall accuracy of tracking.
+
+[KOREAN]
+
+- GPU 프로그래밍 코드(CUDA) 사용을 통해 프레임 처리 속도를 향상시키는 방향으로 개발한다.
+
+- 여러개의 이전 프레임에서 Detect된 물체들의 정보를 적절히 혼합하여 현재 프레임에서 Detect된 물체들의 id를 부여할때 정확도를 더 높여 Tracking의 정확성을 개선하는 방향으로 개발한다.
+
 
 
 
