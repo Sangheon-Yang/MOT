@@ -1,4 +1,4 @@
-[May, 31, 2020] Simple Multiple-Object-Tracking for Sequential images and Video(including camera)
+[May, 31, 2020] Simple Multiple-Object-Tracking for Sequential images & Video
 =======
 
 How To Execute
