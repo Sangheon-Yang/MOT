@@ -30,7 +30,7 @@ About the Project
 
 - Updates will be done at the end of the month.
 
-Referrence
+Reference
 ----------
 - ```Darknet yolov3``` : https://pjreddie.com/darknet/yolo/
 
