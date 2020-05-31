@@ -82,10 +82,6 @@ Result of Sample Test
 
 - result img files  in ```./MOT_out/ ```,  gif files in ```./gif_result/ ```
 
-gif
-
-
-
 
 
 Result Analysis
