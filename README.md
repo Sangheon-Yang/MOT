@@ -36,7 +36,7 @@ Referrence
 
 - ```MOT-challenge``` : https://motchallenge.net
 
-- ```yolov3.weights```: 
+- ```yolov3.weights```: https://pjreddie.com/media/files/yolov3.weights
 
 Updates
 ======
