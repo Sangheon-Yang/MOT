@@ -39,7 +39,5 @@ Reference
 - ```yolov3.weights```: https://pjreddie.com/media/files/yolov3.weights
 
 Updates
-======
-[[May, 31, 2020]_Simple Tracking for Sequential images & Video](https://github.com/Sangheon-Yang/MOT/tree/master/project_05_31_2020)
-------------------------
--  ```./project_05_31_2020/```
+-------
+- [[May, 31, 2020]_Simple Tracking for Sequential images & Video](https://github.com/Sangheon-Yang/MOT/tree/master/project_05_31_2020)
