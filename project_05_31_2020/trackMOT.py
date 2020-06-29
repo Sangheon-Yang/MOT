@@ -110,8 +110,14 @@ def write_(x, img):
 colors = [(255,255,255),(255,0,0),(0,255,0),(0,0,255),(255,255,0),(255,0,255),(0,255,255), (200,100,100),(100,100,200),(100,200,100),(200,200,100),(200,100,200),(100,200,200),(100,100,100)]
 
 
-if __name__ ==  '__main__':
+def track_result(frame, result_file):
+    line = output_w_mid_coord.numpy()
+    print(str(line))
+    result_file.write(str(line))
+    result_file.flush()
 
+if __name__ ==  '__main__':
+    result_file = open('./trackResult.txt', 'w')
     initial_start = time.time()
     
     args = arg_parse()
@@ -236,8 +242,9 @@ if __name__ ==  '__main__':
             output_w_mid_coord[i, 2] = int((output[i, 2] + output[i, 4]) / 2)
             output_w_mid_coord[i, 3] = output[i, 3] - output[i, 1]
             output_w_mid_coord[i, 4] = output[i, 4] - output[i, 2]
-    
-    
+
+        track_result(output_w_mid_coord, result_file)
+
         #NO detection made in previous frame
         if type(previous_output_with_obj_id) == int:
             for n in range(output_w_mid_coord.shape[0]):
@@ -304,4 +311,6 @@ if __name__ ==  '__main__':
     end = time.time()
     print("done!! ")
     print("Total-elapsed time: " + str(end - initial_start))
+
+    result_file.close()
     
