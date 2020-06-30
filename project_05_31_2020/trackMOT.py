@@ -110,11 +110,20 @@ def write_(x, img):
 colors = [(255,255,255),(255,0,0),(0,255,0),(0,0,255),(255,255,0),(255,0,255),(0,255,255), (200,100,100),(100,100,200),(100,200,100),(200,200,100),(200,100,200),(100,200,200),(100,100,100)]
 
 
-def track_result(frame, result_file):
-    line = output_w_mid_coord.numpy()
-    print(str(line))
-    result_file.write(str(line))
-    result_file.flush()
+def track_result(frame, file, frame_no):
+    line = frame.numpy()
+    line_count = 0
+
+    while line_count < line.__len__():
+        output_line = str(frame_no+1) + ","
+        output_line += str(line[line_count][1] + line[line_count][3] / 2) + ","
+        output_line += str(line[line_count][2] + line[line_count][4] / 2) + ","
+        output_line += str(line[line_count][3]) + ","
+        output_line += str(line[line_count][4]) + "\n"
+        file.write(output_line)
+        line_count += 1
+
+    file.flush()
 
 if __name__ ==  '__main__':
     result_file = open('./trackResult.txt', 'w')
@@ -243,7 +252,7 @@ if __name__ ==  '__main__':
             output_w_mid_coord[i, 3] = output[i, 3] - output[i, 1]
             output_w_mid_coord[i, 4] = output[i, 4] - output[i, 2]
 
-        track_result(output_w_mid_coord, result_file)
+        track_result(output_w_mid_coord, result_file, img_id)
 
         #NO detection made in previous frame
         if type(previous_output_with_obj_id) == int:
