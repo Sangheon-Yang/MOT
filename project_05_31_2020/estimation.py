@@ -1,8 +1,6 @@
 
 def printFrame(frame):
-    """
-    Frame 출력 함수
-    """
+    # Frame 출력 함수
 
     frameSize = frame.__len__()
     frameCount = 0
@@ -21,7 +19,6 @@ def printFrame(frame):
 
 
 def convert_to_midPoint(line):
-
     """
     change line
     [frameNo , ID , leftCoordinate , topCoordinate , width , height , conf , x , y , z]
