@@ -1,5 +1,14 @@
 [May, 31, 2020] Simple Multiple-Object-Tracking for Sequential images & Video
 =======
+Installation
+-------------------
+**[ Project Source ]**
+- ```git clone https://github.com/Sangheon-Yang/MOT.git```
+
+**[ Yolo Weights ]**
+- Install [yolov3.weight](https://pjreddie.com/media/files/yolov3.weights)
+
+- Move to ```project_05_31_2020``` folder
 
 How To Execute
 -------------------
@@ -44,7 +53,7 @@ About Object Detection
 About Tracking Algorithm Used in this Update
 --------------
 
-[ENGLISH]
+**ENGLISH**
 
 - The Algorithm for Tracking Objects is Simple.
 
@@ -59,7 +68,7 @@ About Tracking Algorithm Used in this Update
 - Also grant unique id number to all object So that we can easily find out whether the Object-Tracking is well performing or not.
 
 
-[KOREAN]
+**KOREAN**
 
 - 매우 간단한 알고리즘이 적용되었다.
 
@@ -87,13 +96,13 @@ Result of Sample Test
 Result Analysis
 -------------
 
-[ENGLISH]
+**ENGLISH**
 
 - Implementation was done by CPU Programming, So that it takes about 1 to 1.5 second per frame when processing Image. Since there are dozens of frames in a second of video, it will take a lot of times to handle video files.
 
 - Since we only use the information of Objects Deteced in Previous frame to grant the Object_id to the Objects Detected in Current frame, the accuracy of Tracking is tend to be really low. 
 
-[KOREAN]
+**KOREAN**
 
 - CPU만 사용하는 방법으로 구현하였기 때문에 한개의 프레임당 1초~1.5초 정도의 처리 시간이 소모된다. 초당 수십개의 프레임을 처리해야 하는 동영상을 처리할 시 실제 동영상의 길이보다 수십배 더 긴 시간이 소모된다. 
 
@@ -103,13 +112,13 @@ Result Analysis
 Further Step
 -------------
 
-[ENGLISH]
+**ENGLISH**
 
 - We are going to make it faster by using GPU-Programming(CUDA).
 
 - We are going to use not only Previous frame's Detection, but also few frames before it, so that we make some meaningful data out of them. This method would improve the accuracy of granting Object_id to appropriate Object, and it would be helpful for improving overall accuracy of tracking.
 
-[KOREAN]
+**KOREAN**
 
 - GPU 프로그래밍 코드(CUDA) 사용을 통해 프레임 처리 속도를 향상시키는 방향으로 개발한다.
 
