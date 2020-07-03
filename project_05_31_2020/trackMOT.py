@@ -106,73 +106,6 @@ def write_(x, img):
     cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 1, [0,0,0], 1)
     return img
 
-
-def write_result(x, img):
-    c1 = tuple(x[1:3].int())
-    c2 = tuple(x[3:5].int())
-    label = "null"
-
-    cv2.rectangle(img, c1, c2, (255,255,255), 1)
-
-    t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_PLAIN, 1, 1)[0]
-    c2 = c1[0] + t_size[0] + 3, c1[1] + t_size[1] + 4
-    cv2.rectangle(img, c1, c2, (255,255,255), -1)
-    cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 1, [0, 0, 0], 1)
-    return img
-
-def parse_result(trackFrame):
-    detFile = open('./MOT17-03-DPM/det/det.txt', 'r')
-    mot_result = [[], []]
-
-    curFrame = 1
-
-    while True:
-        line = detFile.readline()
-
-        if line == '':
-            break
-
-        line = line.split("\n")[0]
-        parsed_line = line.split(",")
-        converted_line = [0, float(parsed_line[2]), float(parsed_line[3]), float(parsed_line[2]) + float(parsed_line[4]), float(parsed_line[3]) + float(parsed_line[5])]
-
-        if curFrame != float(parsed_line[0]):
-            curFrame += 1
-            # track_result의 Frame 개수 초과 시 break
-            if curFrame > trackFrame:
-                break
-
-            mot_result.append([])
-
-        mot_result[curFrame].append(converted_line)
-
-    detFile.close()
-    return mot_result
-
-def parse_track_result():
-    track_file = open('trackResult2.txt', 'r')
-    tracking_result = [[], []]
-
-    cur_frame = 1
-
-    while True:
-        line = track_file.readline()
-
-        if line == '':
-            break
-
-        line = line.split("\n")[0]
-        parsed_line = line.split(",")
-
-        if cur_frame != float(parsed_line[0]):
-            cur_frame += 1
-            tracking_result.append([])
-
-        tracking_result[cur_frame].append(parsed_line)
-
-    track_file.close()
-    return tracking_result
-
 colors = [(255,255,255),(255,0,0),(0,255,0),(0,0,255),(255,255,0),(255,0,255),(0,255,255), (200,100,100),(100,100,200),(100,200,100),(200,200,100),(200,100,200),(100,200,200),(100,100,100)]
 
 
@@ -199,12 +132,13 @@ if __name__ ==  '__main__':
     args = arg_parse()
     scales = args.scales
     images = args.images
+    print(images)
     count_limit = int(args.count)
     
     confidence = float(args.confidence)
     nms_thesh = float(args.nms_thresh)
 
-    num_classes = 80
+    num_classes = 1
     classes = load_classes('data/coco.names')
     class_load = time.time()
     
@@ -259,9 +193,6 @@ if __name__ ==  '__main__':
     
     print("scale factor")
     print(scaling_factor)
-
-    MOT17_result = parse_result(count_limit)
-    trackMOT_result = parse_track_result()
 
     #-----start for loop -----#
     obj_id = 0
@@ -362,8 +293,6 @@ if __name__ ==  '__main__':
 
         # output for drawing bound boxes
         output = torch.cat((output, obj_flag), 1)
-        curr_img2 = curr_img.copy()
-        curr_img3 = curr_img.copy()
 
         track_result(output_w_mid_coord, result_file, img_id)
         # draw bound box in original image
@@ -378,18 +307,6 @@ if __name__ ==  '__main__':
         cv2.imshow("tracking" , window_resize)
 
         output = torch.cat((output, obj_flag), 1)
-
-        newOutput = np.array(MOT17_result[img_id+1])
-        output2 = torch.from_numpy(newOutput)
-        list(map(lambda x: write_result(x, curr_img2), output2))
-        det_names = args.det + "/det_gt" + curr_img_num_str
-        cv2.imwrite(det_names, curr_img2)
-
-        newOutput2 = np.array(trackMOT_result[img_id + 1], dtype=np.float)
-        output3 = torch.from_numpy(newOutput2)
-        list(map(lambda x: write_result(x, curr_img3), output3))
-        det_names = args.det + "/det_track" + curr_img_num_str
-        cv2.imwrite(det_names, curr_img3)
 
         key = cv2.waitKey(1)
         if key & 0xFF == ord('q'):
