@@ -315,7 +315,7 @@ if __name__ == '__main__':
     # -----start for loop -----#
     obj_id = 0
     #previous_output_with_obj_id = 0
-    min_score_standard = (max(orig_inp_dim_w, orig_inp_dim_h) ** 2) * 2
+    min_score_standard = (max(orig_inp_dim_w, orig_inp_dim_h) ** 2) * 10
 
     object_data_base = torch.zeros(1, 19, dtype=torch.int)
 
@@ -419,6 +419,9 @@ if __name__ == '__main__':
                     new_position_x = int(output_w_mid_coord[i, 1])
                     new_position_y = int(output_w_mid_coord[i, 2])
 
+                    # new detected Bbox Size (radius of max)
+                    detected_radius = int(0.5 * max(output_w_mid_coord[i, 3], output_w_mid_coord[i, 4]))**2
+
                     # direction vector between last and new position
                     distVector_x = new_position_x - last_position_x
                     distVector_y = new_position_y - last_position_y
@@ -426,7 +429,9 @@ if __name__ == '__main__':
                     # distance between new and last position
                     dist_between = distVector_x**2 + distVector_y**2
 
-                    if radius_threshold > dist_between :
+                    ratio_of_Box = float(detected_radius) / float(radius_threshold)
+
+                    if radius_threshold > dist_between and 2 > ratio_of_Box and 0.5 < ratio_of_Box :
                         # if the distance is short enough and this is not matched yet,
                         #calculate dist * 8 + direction * 2 < local_min
 
@@ -449,7 +454,7 @@ if __name__ == '__main__':
                         # distnace between estimated and real new position
                         between_estimated_detected = (estimated_x - new_position_x)**2 + (estimated_y - new_position_y)**2
 
-                        temp_min_score = 8*dist_between + 2*between_estimated_detected
+                        temp_min_score = 8*dist_between + 3*  + 2*between_estimated_detected
 
                         if temp_min_score < local_min_score:
                             local_min_score = temp_min_score
@@ -478,8 +483,7 @@ if __name__ == '__main__':
                 # an object  matched with object database
                 else:
                     last_point_index = object_data_base[temp_obj_index, 16]
-                    print(last_point_index)
-                    new_point_index = ((last_point_index + 1) % 6) + 1
+                    new_point_index = (last_point_index % 6) + 1
                     object_data_base[temp_obj_index, 16] = new_point_index
 
                     # setting start point of direction vector
@@ -487,7 +491,7 @@ if __name__ == '__main__':
                         starting_point = 1
                         object_data_base[temp_obj_index, 15] += 1
                     else:
-                        starting_point = ((new_point_index + 1) % 6) + 1
+                        starting_point = (new_point_index % 6) + 1
 
                     # adding new detected point
                     object_data_base[temp_obj_index, new_point_index] = int(output_w_mid_coord[i, 1])
