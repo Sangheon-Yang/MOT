@@ -109,14 +109,47 @@ def write_(x, img):
     return img
 
 
+def write_track(x, img):
+
+    for object_index in range(1, object_data_base.shape[0]):
+        detected_object = object_data_base[object_index]
+        point_count = detected_object[15]
+        curr_point = detected_object[16]
+        loop_count = 0
+
+        while loop_count < point_count:
+            curr_point = curr_point % (point_count+1)
+
+            if curr_point == 0:
+                curr_point += 1
+
+            next_point = (curr_point+1) % (point_count+1)
+
+            if next_point == 0:
+                next_point += 1
+
+            c1 = tuple([detected_object[curr_point], detected_object[curr_point+6]])
+            c2 = tuple([detected_object[next_point], detected_object[next_point+6]])
+            color = colors[int(detected_object[0]) % 14]
+
+            if loop_count + 1 != point_count:
+                cv2.line(img, c1, c2, color, 1)
+
+            cv2.circle(img, c1, 3, color, -1)
+
+            loop_count += 1
+            curr_point = next_point
+
+    return img
+
+
 colors = [(255, 255, 255), (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255),
           (200, 100, 100), (100, 100, 200), (100, 200, 100), (200, 200, 100), (200, 100, 200), (100, 200, 200),
           (100, 100, 100)]
 
 
-def track_result(frame, result_file):
+def track_result():
     line = output_w_mid_coord.numpy()
-    print(str(line))
     result_file.write(str(line))
     result_file.flush()
 
@@ -473,8 +506,7 @@ if __name__ == '__main__':
                     tempObjInf[0, 14] = 0  # y instance of direction vector
                     tempObjInf[0, 15] = 1  # count of objects that are in 'object_data_base'
                     tempObjInf[0, 16] = 1  # index of current object's postion
-                    tempObjInf[0, 17] = int(0.5 * (max(output_w_mid_coord[i, 3], output_w_mid_coord[
-                        i, 4]))) ** 2  # Radius sqr of range of further detection
+                    tempObjInf[0, 17] = int(0.5 * (max(output_w_mid_coord[i, 3], output_w_mid_coord[i, 4]))) ** 2  # Radius sqr of range of further detection
                     tempObjInf[0, 18] = frame_num
                     # concating new obj_id to object_data_base
 
@@ -516,10 +548,9 @@ if __name__ == '__main__':
         # output for drawing bound boxes
         output = torch.cat((output, obj_flag), 1)
 
-        print(object_data_base)
-
         # draw bound box in original image
         list(map(lambda x: write_(x, curr_img), output))
+        list(map(lambda x: write_track(x, curr_img), object_data_base))
 
         # write a new image in destination_path
         det_names = args.det + "/det_" + curr_img_num_str
