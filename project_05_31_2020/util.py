@@ -379,3 +379,57 @@ def write_results_half(prediction, confidence, num_classes, nms = True, nms_conf
                 output = torch.cat((output,out))
     
     return output
+
+
+colors = [(255, 255, 255), (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255),
+              (200, 100, 100), (100, 100, 200), (100, 200, 100), (200, 200, 100), (200, 100, 200), (100, 200, 200),
+              (100, 100, 100)]
+
+
+def write_(x, img, classes):
+    c1 = tuple(x[1:3].int())
+    c2 = tuple(x[3:5].int())
+    cls = int(x[7])
+    label = "{0}".format(classes[cls])
+    label = label + ' ' + str(int(x[8]))
+
+    color = colors[int(x[8]) % 14]
+
+    cv2.rectangle(img, c1, c2, color, 1)
+
+    t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_PLAIN, 1, 1)[0]
+    c2 = c1[0] + t_size[0] + 3, c1[1] + t_size[1] + 4
+    cv2.rectangle(img, c1, c2, color, -1)
+    cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 1, [0, 0, 0], 1)
+    return img
+
+
+def write_track(x, img):
+    if x[0] != 0:
+        point_count = x[15]
+        curr_point = x[16]
+        loop_count = 0
+
+        while loop_count < point_count:
+            curr_point = curr_point % (point_count+1)
+
+            if curr_point == 0:
+                curr_point += 1
+
+            next_point = (curr_point+1) % (point_count+1)
+
+            if next_point == 0:
+                next_point += 1
+
+            c1 = tuple([x[curr_point], x[curr_point+6]])
+            c2 = tuple([x[next_point], x[next_point+6]])
+            color = colors[int(x[0]) % 14]
+
+            if loop_count + 1 != point_count:
+                cv2.line(img, c1, c2, color, 1)
+
+            cv2.circle(img, c1, 3, color, -1)
+
+            loop_count += 1
+            curr_point = next_point
+    return img

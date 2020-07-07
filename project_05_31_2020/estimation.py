@@ -77,7 +77,7 @@ def printFrame(frame):
     frameCount = 0
 
     while frameCount < frameSize:
-        print("frame"+str(frame[frameCount][0][0])+": ")
+        print("frame"+str(frame[frameCount][0][0][0])+": ")
 
         objSize = frame[frameCount].__len__()
         objCount = 0
@@ -98,7 +98,7 @@ def convert_to_midPoint(line):
     midPointX = float(line[2]) + (float(line[4]) / 2)
     midPointY = float(line[3]) + (float(line[5]) / 2)
 
-    parsedLine = [line[0], midPointX, midPointY, line[4], line[5]]
+    parsedLine = [line[0], midPointX, midPointY, line[4], line[5], line[6]]
     return parsedLine
 
 
@@ -129,47 +129,14 @@ def compare_results(track_result, MOT_result, threshold):
             for pop_object in matched_list:
                 track_result[i].remove(pop_object)
             matched_list.clear()
-
     return matching_result
 
-if __name__ == '__main__':
 
-    args = arg_parse()
-    threshold = args.threshold
-    images = args.images
-
-####################### Track MOT Parsing #######################
-    trackFile = open('trackResult.txt', 'r')
-    track_result = [[], []]
-
+def object_data_parse(file, frame_count):
     curFrame = 1
-
+    parse_array = [[], []]
     while True:
-        line = trackFile.readline()
-
-        if line == '':
-            break
-
-        line = line.split("\n")[0]
-        parsed_line = line.split(",")
-
-        if curFrame != float(parsed_line[0]):
-            curFrame += 1
-            track_result.append([])
-
-        track_result[curFrame].append(parsed_line)
-
-    trackFile.close()
-    trackFrame = curFrame
-
-####################### MOT 17 Det Parsing #######################
-    detFile = open('./MOT17-03-DPM/det/det.txt', 'r')
-    mot_result = [[], []]
-
-    curFrame = 1
-
-    while True:
-        line = detFile.readline()
+        line = file.readline()
 
         if line == '':
             break
@@ -181,25 +148,37 @@ if __name__ == '__main__':
         if curFrame != float(parsed_line[0]):
             curFrame += 1
             # track_result의 Frame 개수 초과 시 break
-            if curFrame > trackFrame:
+            if curFrame > frame_count:
                 break
 
-            mot_result.append([])
+            parse_array.append([])
 
-        mot_result[curFrame].append(converted_line)
+        parse_array[curFrame].append(converted_line)
 
-    detFile.close()
+    file.close()
+    return parse_array, curFrame-1
 
-########################## Compare Result ##########################
+
+if __name__ == '__main__':
+
+    args = arg_parse()
+    threshold = args.threshold
+    images = args.images
+    trackFrame = 10000000
+
+    trackFile = open('MOT_result/trackResult.txt', 'r')
+    detFile = open('./MOT17-03-DPM/det/det.txt', 'r')
+
+    track_result, trackFrame = object_data_parse(trackFile, trackFrame)
+    mot_result, trackFrame = object_data_parse(detFile, trackFrame)
+
     output_list = compare_results(track_result, mot_result, threshold)
 
-########################## Write Result ##########################
+    inp_dim = int(args.reso)
+    assert inp_dim % 32 == 0
+    assert inp_dim > 32
 
     for img_id in range(trackFrame):
-
-        inp_dim = int(args.reso)
-        assert inp_dim % 32 == 0
-        assert inp_dim > 32
 
         curr_img_num_str = str(img_id + 1).zfill(6) + ".jpg"
         curr_img_path = osp.join(osp.realpath('.'), images, curr_img_num_str)

@@ -126,7 +126,7 @@ def track_result(frame, file, frame_no):
     file.flush()
 
 if __name__ ==  '__main__':
-    result_file = open('trackResult.txt', 'w')
+    result_file = open('MOT_result/trackResult.txt', 'w')
     initial_start = time.time()
     
     args = arg_parse()
