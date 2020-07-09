@@ -6,9 +6,8 @@ Installation
 - ```git clone https://github.com/Sangheon-Yang/MOT.git```
 
 **[ Yolo Weights ]**
-- Install [yolov3.weight](https://pjreddie.com/media/files/yolov3.weights)
-
 - Move to ```project_05_31_2020``` folder
+- DownLoad [yolov3.weight](https://pjreddie.com/media/files/yolov3.weights)
 
 How To Execute
 -------------------
