@@ -54,7 +54,7 @@ Tracking Algorithm
 - [**Version_01 : Simple Tracker that considers only One-Previous-Frame's detection**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-01)
 
 
-- [**Version 02 : Tracker that considers maximum 6-Previous-Frames' detections**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-02)
+- [**Version_02 : Tracker that considers maximum 6-Previous-Frames' detections**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-02)
 
 
 Further Step
