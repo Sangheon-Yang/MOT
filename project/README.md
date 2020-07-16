@@ -51,10 +51,10 @@ About Object Detection
 Tracking Algorithm
 =================
 
-- [**Version_01 : Simple Tracker that reference only One Previous Frame**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-01)
+- [**Version_01 : Simple Tracker that considers only One Previous Frame's detection**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-01)
 
 
-- [**Version 02 : **](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-02)
+- [**Version 02 : Tracker that references maximum 6 Previous Frames' detections**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-02)
 
 
 Further Step
