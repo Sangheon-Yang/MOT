@@ -487,7 +487,7 @@ if __name__ == '__main__':
                         # distnace between estimated and real new position
                         between_estimated_detected = (estimated_x - new_position_x)**2 + (estimated_y - new_position_y)**2
 
-                        temp_min_score = 8*dist_between + 3*  + 2*between_estimated_detected
+                        temp_min_score = 8*dist_between + 2*between_estimated_detected
 
                         if temp_min_score < local_min_score:
                             local_min_score = temp_min_score
