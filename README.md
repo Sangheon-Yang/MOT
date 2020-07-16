@@ -21,21 +21,15 @@ from
 About the Project
 --------
 - Final Goal of this project is to implement ```MOT``` 
-
 - In order to implement ```MOT```, ```Object-Detection``` and ```Tracking``` need to be implemented sequentially.
-
 - In ```Original Src``` (https://github.com/ayooshkathuria/pytorch-yolo-v3.git),  ```Object-Detection``` is already implemented by using ```Darknet YOLOV3``` Network.
-
 - In this project, we are planing to implement ```MOT``` by adding  ```tracking``` feature to ```Original src``` above.
-
 - Updates will be done at the end of the month.
 
 Reference
 ----------
 - ```Darknet yolov3``` : https://pjreddie.com/darknet/yolo/
-
 - ```MOT-challenge``` : https://motchallenge.net
-
 - ```yolov3.weights```: https://pjreddie.com/media/files/yolov3.weights
 
 Updates
