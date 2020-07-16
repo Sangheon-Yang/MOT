@@ -40,4 +40,5 @@ Reference
 
 Updates
 -------
-- [[May, 31, 2020]_Simple Tracking for Sequential images & Video](https://github.com/Sangheon-Yang/MOT/tree/master/project_05_31_2020)
+- [[May. 2020.] Tracker Version 01](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-01)
+- [[July. 2020.] Tracker Version 02](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-02)
