@@ -1,7 +1,7 @@
 /**/yolov3.weights
 /**/.idea
 /**/.DS_Store
-/project_05_31_2020/**/__pycache__
+/project/**/__pycache__
 /**/trackResult.txt
 /**/MOT_output
 /**/est_output
