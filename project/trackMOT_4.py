@@ -94,9 +94,7 @@ def write_person(x, results):
 def write_(x, img):
     c1 = tuple(x[1:3].int())
     c2 = tuple(x[3:5].int())
-    cls = int(x[7])
-    label = "{0}".format(classes[cls])
-    label = label + ' ' + str(int(x[8]))
+    label = str(int(x[8]))
 
     color = colors[int(x[8]) % 14]
 
@@ -148,14 +146,25 @@ colors = [(255, 255, 255), (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0),
           (100, 100, 100)]
 
 
-def track_result():
-    line = output_w_mid_coord.numpy()
-    result_file.write(str(line))
+def track_result(result, frame_num):
+    line = result.numpy()
+    line_count = 0
+
+    while line_count < line.__len__():
+        output_line = str(frame_num) + ","
+        output_line += str(line[line_count][8]) + ","
+        output_line += str(line[line_count][1]) + ","
+        output_line += str(line[line_count][2]) + ","
+        output_line += str(float(line[line_count][3]) - float(line[line_count][1])) + ","
+        output_line += str(float(line[line_count][4]) - float(line[line_count][2])) + "\n"
+        result_file.write(output_line)
+        line_count += 1
+
     result_file.flush()
 
 
 if __name__ == '__main__':
-    result_file = open('./trackResult.txt', 'w')
+    result_file = open('./MOT_result/trackResult.txt', 'w')
     initial_start = time.time()
 
     args = arg_parse()
@@ -547,6 +556,8 @@ if __name__ == '__main__':
 
         # output for drawing bound boxes
         output = torch.cat((output, obj_flag), 1)
+
+        track_result(output, frame_num)
 
         # draw bound box in original image
         list(map(lambda x: write_(x, curr_img), output))
