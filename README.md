@@ -36,4 +36,4 @@ Updates
 -------
 - [[May. 2020.] Tracker Version 01](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-01)
 - [[July. 2020.] Tracker Version 02](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-02)
--[[August. 2020.] Tracking Performance Evaluation](https://github.com/Sangheon-Yang/MOT/wiki/Tracking-Performance-Evaluation)
+- [[August. 2020.] Tracking Performance Evaluation](https://github.com/Sangheon-Yang/MOT/wiki/Tracking-Performance-Evaluation)
