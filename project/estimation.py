@@ -108,15 +108,21 @@ def convert_to_track_array(line):
 
 def compare_results(track_result, MOT_result, threshold):
     matching_result = []
+    iou_sum = 0
+    object_sum = 0
 
     # frame loop
     for i in range(1, track_result.__len__()):
         matching_result.append([])
+        result = 0
+        GT_object_count = 0
+
         # MOT object loop
         for track_object in track_result[i]:
             # track object loop
             max_iou = 0
             max_iou_object = None
+            GT_object_count = MOT_result.__len__()
 
             for MOT_object in MOT_result[i]:
                 xA = max(float(MOT_object[2]), float(track_object[2]))
@@ -139,10 +145,27 @@ def compare_results(track_result, MOT_result, threshold):
                     max_iou_object = MOT_object
 
             if max_iou_object != None:
+                result += max_iou
                 matching_result[i - 1].append([max_iou_object, track_object])
                 MOT_result[i].remove(max_iou_object)
 
+        iou_sum += result / matching_result[i - 1].__len__()
+        object_sum += matching_result[i - 1].__len__() / GT_object_count
+
+    print("Average IOU: " + str((iou_sum/matching_result.__len__())*100) + "%")
+    print("Average Detection Object: " + str((object_sum / matching_result.__len__()) * 100) + "%")
+
     return matching_result
+
+def track_table_result():
+    line = track_table.numpy()
+
+    for i in range(line.__len__()):
+        for j in range(line[i].__len__()):
+            track_table_file.write(str(line[i][j]) + " ")
+        track_table_file.write("\n")
+        track_table_file.flush()
+
 
 if __name__ == '__main__':
 
@@ -153,6 +176,7 @@ if __name__ == '__main__':
 ####################### Track MOT Parsing #######################
     trackFile = open('./MOT_result/trackResult.txt', 'r')
     track_result = [[], []]
+    max_object_id = -1
 
     curFrame = 1
 
@@ -160,6 +184,10 @@ if __name__ == '__main__':
         line = trackFile.readline()
 
         if line == '':
+            break
+
+        if line.startswith('#'):
+            max_object_id = int(line.split(",")[1])
             break
 
         line = line.split("\n")[0]
@@ -202,17 +230,138 @@ if __name__ == '__main__':
 ########################## Compare Result ##########################
     output_list = compare_results(track_result, gt_result, threshold)
 
+    track_table = torch.zeros(count+1, max_object_id+1, dtype=torch.int)
+
+    for i in range(0, count+1):
+        track_table[i][0] = i
+
+    for i in range(0, max_object_id+1):
+        track_table[0][i] = i
+
+    for pair in output_list:
+        for matched_object in pair:
+            track_table[int(float(matched_object[0][0]))][int(float(matched_object[1][1]))] = int(float(matched_object[0][1]))
+
+    track_table_file = open('./MOT_result/trackTable.txt', 'w')
+    track_table_result()
+
+########################## Estimate Accuracy ##########################
+    # 프레임 바이 프레임
+    previous_id_array = np.zeros(max_object_id + 1)
+    result = 0.0
+
+    for i in range(1, count + 1):
+        id_count = 0
+        matched_id_count = 0
+
+        for j in range(1, max_object_id + 1):
+            if track_table[i][j] == 0:
+                continue
+
+            if previous_id_array[j] == 0:
+                previous_id_array[j] = track_table[i][j]
+                continue
+
+            if track_table[i][j] == previous_id_array[j]:
+                matched_id_count += 1
+
+            id_count += 1
+            previous_id_array[j] = track_table[i][j]
+
+        if id_count != 0:
+            result += float(matched_id_count) / float(id_count)
+
+    result = (result / (count-1)) * 100
+
+    print("Frame By Frame: "+str(result)+"%")
+
+    # 이니셜 아이디 키핑 레이트
+    initial_id_array = np.zeros(max_object_id + 1)
+    result = 0.0
+
+    for i in range(1, max_object_id + 1):
+        id_count = 0
+        matched_id_count = 0
+
+        for j in range(1, count + 1):
+            if track_table[j][i] == 0:
+                continue
+
+            if initial_id_array[i] == 0:
+                initial_id_array[i] = track_table[j][i]
+                continue
+
+            id_count += 1
+            if track_table[j][i] == initial_id_array[i]:
+                matched_id_count += 1
+
+        if id_count != 0:
+            result += float(matched_id_count) / float(id_count)
+
+    result = (result / max_object_id) * 100
+
+    print("Initial ID Keeping: " + str(result) + "%")
+
+    # 처음과 끝
+    start_id_array = np.zeros(max_object_id + 1)
+    end_id_array = np.zeros(max_object_id + 1)
+    id_count = 0
+    matched_id_count = 0
+
+    for i in range(1, max_object_id + 1):
+        for j in range(1, count + 1):
+            if track_table[j][i] != 0:
+                if start_id_array[i] == 0:
+                    start_id_array[i] = track_table[j][i]
+                else:
+                    end_id_array[i] = track_table[j][i]
+
+    for i in range(1, max_object_id + 1):
+        if start_id_array[i] == 0 or end_id_array[i] == 0:
+            continue
+
+        id_count += 1
+        if start_id_array[i] == end_id_array[i]:
+            matched_id_count += 1
+
+    print("Initial Last Matched: " + str((matched_id_count / id_count)*100) + "%")
+
+    # 메이저 아이디
+    result = 0
+    for i in range(1, max_object_id + 1):
+        major_id = {}
+        id_count = 0
+        max_val = 0
+
+        for j in range(1, count + 1):
+            if track_table[j, i] == 0:
+                continue
+
+            id_count += 1
+            if major_id.__contains__(int(track_table[j, i])):
+                major_id[int(track_table[j, i])] += 1
+            else:
+                major_id[int(track_table[j, i])] = 1
+
+        for value in major_id.values():
+            if max_val < value:
+                max_val = value
+
+        if id_count != 0:
+            result += max_val / id_count
+
+    print("Major ID: " + str((result / max_object_id) * 100) + "%")
 ########################## Write Result ##########################
-    print(count)
-    for img_id in range(count):
-        inp_dim = 416
-
-        curr_img_num_str = str(img_id + 1).zfill(6) + ".jpg"
-        curr_img_path = osp.join(osp.realpath('.'), "./MOT17-04-DPM/img1/", curr_img_num_str)
-        processed_img, curr_img, dim = prep_image(curr_img_path, inp_dim)
-
-        list(map(lambda x: write_result(x, curr_img), output_list[img_id]))
-
-        # write a new image in destination_path
-        det_names = "est_output/est_" + curr_img_num_str
-        cv2.imwrite(det_names, curr_img)
+    #
+    # for img_id in range(count):
+    #     inp_dim = 416
+    #
+    #     curr_img_num_str = str(img_id + 1).zfill(6) + ".jpg"
+    #     curr_img_path = osp.join(osp.realpath('.'), "./MOT17-04-DPM/img1/", curr_img_num_str)
+    #     processed_img, curr_img, dim = prep_image(curr_img_path, inp_dim)
+    #
+    #     list(map(lambda x: write_result(x, curr_img), output_list[img_id]))
+    #
+    #     # write a new image in destination_path
+    #     det_names = "est_output/est_" + curr_img_num_str
+    #     cv2.imwrite(det_names, curr_img)
