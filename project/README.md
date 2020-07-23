@@ -53,8 +53,9 @@ Tracking Algorithm
 
 - [**Version_01 : Simple Tracker that considers only One-Previous-Frame's detection**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-01)
 
+- [**Version_01.1 : Tracker that consider only One-Latest-Locations of Objects**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-01.1)
 
-- [**Version_02 : Tracker that considers maximum 6-Previous-Frames' detections**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-02)
+- [**Version_02 : Tracker that considers maximum 6-Latest-Locations of Objects and Estimate Directions and Next Locations**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-02)
 
 
 Further Step
