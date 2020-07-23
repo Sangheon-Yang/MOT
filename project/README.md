@@ -55,7 +55,7 @@ Tracking Algorithm
 
 - [**Version_01.1 : Tracker that considers only One-Latest-Locations of Detected Objects**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-01.1)
 
-- [**Version_02 : Tracker that considers maximum 6-Latest-Locations of Detected Objects and Estimate Directions and Desired-Next-Locations**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-02)
+- [**Version_02 : Tracker that considers maximum 6-Latest-Locations of Detected Objects for Estimating Directions and Next-Locations**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-02)
 
 
 Further Step
