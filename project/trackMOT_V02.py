@@ -246,9 +246,8 @@ if __name__ == '__main__':
             i += 1
             continue
 
-
         # ****** detect only person ********************
-        prediction = prediction[prediction[:, 7] == 0]
+        #prediction = prediction[prediction[:, 7] == 0]
         
         # detection were made
         print("in image : " + curr_img_num_str)

@@ -219,7 +219,7 @@ if __name__ == '__main__':
     #previous_output_with_obj_id = 0
     min_score_standard = (max(orig_inp_dim_w, orig_inp_dim_h) ** 2) * 10
 
-    object_data_base = torch.zeros(1, 19, dtype=torch.int)
+    object_ID_Cache = torch.zeros(1, 5, dtype=torch.int)
 
     for img_id in range(count_limit):
         # load the image
@@ -246,9 +246,8 @@ if __name__ == '__main__':
             i += 1
             continue
 
-
         # ****** detect only person ********************
-        prediction = prediction[prediction[:, 7] == 0]
+        #prediction = prediction[prediction[:, 7] == 0]
         
         # detection were made
         print("in image : " + curr_img_num_str)
@@ -283,147 +282,85 @@ if __name__ == '__main__':
 
         # when the object_data_base in empty.
         # This code is for only first frame of the video
-        if object_data_base.shape[0] == 1 :
+        if object_ID_Cache.shape[0] == 1 :
             for n in range(output_w_mid_coord.shape[0]):
                 obj_id += 1
                 obj_flag[n, 0] = obj_id  # grant new object_ID
-                tempObjInfo = torch.zeros(1, 19, dtype=torch.int)
+                tempObjInfo = torch.zeros(1, 5, dtype=torch.int)
                 tempObjInfo[0, 0] = obj_id # object_id that granted to objects uniquely
                 tempObjInfo[0, 1] = int(output_w_mid_coord[n, 1]) # first x_position of detected object
-                tempObjInfo[0, 7] = int(output_w_mid_coord[n, 2]) # first y_position of detected object
-                tempObjInfo[0, 13] = 0 # x instance of direction vector
-                tempObjInfo[0, 14] = 0 # y instance of direction vector
-                tempObjInfo[0, 15] = 1 # count of objects that are in 'object_data_base'
-                tempObjInfo[0, 16] = 1 # index of current object's postion
-                tempObjInfo[0, 17] = int(0.5*(max(output_w_mid_coord[n,3], output_w_mid_coord[n,4])))**2 # Radius sqr of range of further detection
-                tempObjInfo[0, 18] = frame_num # for checking whether it is matched or not
+                tempObjInfo[0, 2] = int(output_w_mid_coord[n, 2]) # first y_position of detected object
+                tempObjInfo[0, 3] = int(0.5*(max(output_w_mid_coord[n,3], output_w_mid_coord[n,4])))**2 # Radius sqr of range of further detection
+                tempObjInfo[0, 4] = frame_num # for checking whether it is matched or not
                 # concating new obj_id to object_data_base
-                object_data_base = torch.cat((object_data_base, tempObjInfo), 0)
+                object_ID_Cache = torch.cat((object_ID_Cache, tempObjInfo), 0)
 
 
         # some detections were made in prevous frame
-        # object_data_base is not empty
+        # object_ID_Cache is not empty
         # we should grant the obj_id to newly detected objects in the current frame
         else:
             for i in range(output_w_mid_coord.shape[0]):  # check the newly detected objects
                 temp_obj_index = -1
-                local_min_score = min_score_standard
+                local_min_dist = min_score_standard
 
-                for j in range(object_data_base.shape[0]):  # check the database of detected objects before
+                # position of the object that newly detected in this new frame
+                new_position_x = int(output_w_mid_coord[i, 1])
+                new_position_y = int(output_w_mid_coord[i, 2])
+                # RAdius threshold related to new detected Bbox Size (radius of max)
+                radius_threshold = int(0.5 * max(output_w_mid_coord[i, 3], output_w_mid_coord[i, 4])) ** 2
 
-                    if j == 0 or object_data_base[j, 18] == frame_num:
+                for j in range(object_ID_Cache.shape[0]):  # check the database of detected objects before
+
+                    if j == 0 or object_ID_Cache[j, 4] == frame_num:
                         continue
 
-                    # calculate euclidean distance square
-                    radius_threshold = object_data_base[j, 17]
-
                     # last location of object (current position that detected)
-                    last_position_x = object_data_base[j, object_data_base[j, 16]]
-                    last_position_y = object_data_base[j, (object_data_base[j, 16] + 6)]
-
-                    # position of the object that newly detected in this new frame
-                    new_position_x = int(output_w_mid_coord[i, 1])
-                    new_position_y = int(output_w_mid_coord[i, 2])
-
-                    # new detected Bbox Size (radius of max)
-                    detected_radius = int(0.5 * max(output_w_mid_coord[i, 3], output_w_mid_coord[i, 4]))**2
+                    last_position_x = object_ID_Cache[j, 1]
+                    last_position_y = object_ID_Cache[j, 2]
 
                     # direction vector between last and new position
-                    distVector_x = new_position_x - last_position_x
-                    distVector_y = new_position_y - last_position_y
+                    dist_x = new_position_x - last_position_x
+                    dist_y = new_position_y - last_position_y
 
                     # distance between new and last position
-                    dist_between = distVector_x**2 + distVector_y**2
+                    dist_between = dist_x**2 + dist_y**2
 
-                    ratio_of_Box = float(detected_radius) / float(radius_threshold)
-
-                    if radius_threshold > dist_between and 2 > ratio_of_Box and 0.5 < ratio_of_Box :
+                    if radius_threshold > dist_between and local_min_dist > dist_between:
                         # if the distance is short enough and this is not matched yet,
-                        #calculate dist * 8 + direction * 2 < local_min
-
-                        # estimated direction vector at the last position of the object
-
-                        size_of_dV = math.sqrt(object_data_base[j, 13]**2 + object_data_base[j, 14]**2)
-                        pure_dist = math.sqrt(dist_between)
-
-                        if size_of_dV < 0.000000001:
-                            dirVector_x = 0
-                            dirVector_y = 0
-                        else:
-                            dirVector_x = int(pure_dist * (object_data_base[j, 13] / size_of_dV))
-                            dirVector_y = int(pure_dist * (object_data_base[j, 14] / size_of_dV))
-
-                        # estimated position using the estimated direction vector and the last position
-                        estimated_x = last_position_x + dirVector_x
-                        estimated_y = last_position_y + dirVector_y
-
-                        # distnace between estimated and real new position
-                        between_estimated_detected = (estimated_x - new_position_x)**2 + (estimated_y - new_position_y)**2
-
-                        temp_min_score = 8*dist_between + 2*between_estimated_detected
-
-                        if temp_min_score < local_min_score:
-                            local_min_score = temp_min_score
-                            temp_obj_index = j
+                        local_min_dist = dist_between
+                        temp_obj_index = j
 
                 # current frame's object did not match with any object in previous frame
                 if temp_obj_index == -1:
                     obj_id += 1
-                    obj_flag[i, 0] = obj_id
-                    # create new object information in database.
-                    tempObjInf = torch.zeros(1, 19, dtype=torch.int)
-                    tempObjInf[0, 0] = obj_id  #object_id that granted to objects uniquely
-                    tempObjInf[0, 1] = int(output_w_mid_coord[i, 1])  # first x_position of detected object
-                    tempObjInf[0, 7] = int(output_w_mid_coord[i, 2])  # first y_position of detected object
-                    tempObjInf[0, 13] = 0  # x instance of direction vector
-                    tempObjInf[0, 14] = 0  # y instance of direction vector
-                    tempObjInf[0, 15] = 1  # count of objects that are in 'object_data_base'
-                    tempObjInf[0, 16] = 1  # index of current object's postion
-                    tempObjInf[0, 17] = int(0.5 * (max(output_w_mid_coord[i, 3], output_w_mid_coord[i, 4]))) ** 2  # Radius sqr of range of further detection
-                    tempObjInf[0, 18] = frame_num
+                    obj_flag[i, 0] = obj_id  # grant new object_ID
+                    tempObjInfo = torch.zeros(1, 5, dtype=torch.int)
+                    tempObjInfo[0, 0] = obj_id  # object_id that granted to objects uniquely
+                    tempObjInfo[0, 1] = int(output_w_mid_coord[i, 1])  # first x_position of detected object
+                    tempObjInfo[0, 2] = int(output_w_mid_coord[i, 2])  # first y_position of detected object
+                    tempObjInfo[0, 3] = int(0.5 * (max(output_w_mid_coord[i, 3], output_w_mid_coord[
+                        i, 4]))) ** 2  # Radius sqr of range of further detection
+                    tempObjInfo[0, 4] = frame_num  # for checking whether it is matched or not
                     # concating new obj_id to object_data_base
+                    object_ID_Cache = torch.cat((object_ID_Cache, tempObjInfo), 0)
 
-                    object_data_base = torch.cat((object_data_base, tempObjInf), 0)
 
                 # an object  matched with object database
                 else:
-                    last_point_index = object_data_base[temp_obj_index, 16]
-                    new_point_index = (last_point_index % 6) + 1
-                    object_data_base[temp_obj_index, 16] = new_point_index
-
-                    # setting start point of direction vector
-                    if object_data_base[temp_obj_index, 15] < 6:
-                        starting_point = 1
-                        object_data_base[temp_obj_index, 15] += 1
-                    else:
-                        starting_point = (new_point_index % 6) + 1
-
-                    # adding new detected point
-                    object_data_base[temp_obj_index, new_point_index] = int(output_w_mid_coord[i, 1])
-                    object_data_base[temp_obj_index, new_point_index+6] = int(output_w_mid_coord[i, 2])
-
-                    # calculating accumulated vector of direction
-                    acc_vector_x = object_data_base[temp_obj_index, new_point_index] - object_data_base[temp_obj_index, starting_point]
-                    acc_vector_y = object_data_base[temp_obj_index, new_point_index+6] - object_data_base[temp_obj_index, starting_point+6]
-
-                    object_data_base[temp_obj_index, 13] = acc_vector_x
-                    object_data_base[temp_obj_index, 14] = acc_vector_y
-
-                    # setting new radius sqr of range of further detection
-                    object_data_base[temp_obj_index, 17] = int(0.5 * (max(output_w_mid_coord[i, 3], output_w_mid_coord[
-                        i, 4]))) ** 2
-
-                    object_data_base[temp_obj_index, 18] = frame_num
-
+                    object_ID_Cache[temp_obj_index, 1] = new_position_x
+                    object_ID_Cache[temp_obj_index, 2] = new_position_y
+                    object_ID_Cache[temp_obj_index, 3] = radius_threshold
+                    object_ID_Cache[temp_obj_index, 4] = frame_num
                     obj_flag[i, 0] = temp_obj_index
-                    #previous_output_with_obj_id[temp_obj_index, 6] = -1
 
         # output for drawing bound boxes
         output = torch.cat((output, obj_flag), 1)
 
         # draw bound box in original image
         list(map(lambda x: write_(x, curr_img), output))
-        list(map(lambda x: write_track(x, curr_img), object_data_base))
+
+        #list(map(lambda x: write_track(x, curr_img), object_data_base))
 
         # write a new image in destination_path
         det_names = args.det + "/det_" + curr_img_num_str
