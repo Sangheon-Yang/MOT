@@ -32,8 +32,10 @@ def convert_to_drawPoint(line):
     parsedLine = [line[0], line[1], line[2], line[3], rightPointX, rightPointY]
     return parsedLine
 
+path = './train/MOT17-11-DPM/'
+
 if __name__ == '__main__':
-    gtFile = open('./MOT17-04-DPM/gt/gt.txt', 'r')
+    gtFile = open(path + 'gt/gt.txt', 'r')
     gt_result = [[]]
     images = 100
 
@@ -62,7 +64,7 @@ if __name__ == '__main__':
         inp_dim = 416
 
         curr_img_num_str = str(img_id + 1).zfill(6) + ".jpg"
-        curr_img_path = osp.join(osp.realpath('.'), "./MOT17-04-DPM/img1/", curr_img_num_str)
+        curr_img_path = osp.join(osp.realpath('.'), path + "img1/", curr_img_num_str)
         processed_img, curr_img, dim = prep_image(curr_img_path, inp_dim)
 
         list(map(lambda x: write_(x, curr_img), gt_result[img_id]))

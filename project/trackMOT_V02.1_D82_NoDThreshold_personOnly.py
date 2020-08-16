@@ -143,9 +143,20 @@ def write_track(x, img):
 colors = [(255, 255, 255), (255, 100, 100), (0, 255, 0), (110, 110, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255), (255, 255, 150), (255, 150, 255), (150, 255, 255), (150, 255, 150), (150, 150, 255), (255, 150, 150), (150, 150, 150)]
 
 
-def track_result():
-    line = output_w_mid_coord.numpy()
-    result_file.write(str(line))
+def track_result(result, frame_num):
+    line = result.numpy()
+    line_count = 0
+
+    while line_count < line.__len__():
+        output_line = str(frame_num) + ","
+        output_line += str(line[line_count][8]) + ","
+        output_line += str(line[line_count][1]) + ","
+        output_line += str(line[line_count][2]) + ","
+        output_line += str(float(line[line_count][3]) - float(line[line_count][1])) + ","
+        output_line += str(float(line[line_count][4]) - float(line[line_count][2])) + "\n"
+        result_file.write(output_line)
+        line_count += 1
+
     result_file.flush()
 
 
@@ -246,8 +257,9 @@ if __name__ == '__main__':
             i += 1
             continue
 
+
         # ****** detect only person ********************
-        #prediction = prediction[prediction[:, 7] == 0]
+        prediction = prediction[prediction[:, 7] == 0]
         
         # detection were made
         print("in image : " + curr_img_num_str)
@@ -336,12 +348,10 @@ if __name__ == '__main__':
 
                     ratio_of_Box = float(detected_radius) / float(radius_threshold)
 
-                    if radius_threshold > dist_between and 2 > ratio_of_Box and 0.5 < ratio_of_Box :
-                        # if the distance is short enough and this is not matched yet,
+                    if 2 > ratio_of_Box and 0.5 < ratio_of_Box :
+                        # NO Distance Threshold in this version, Consider only the BBox Size.
                         #calculate dist * 8 + direction * 2 < local_min
-
                         # estimated direction vector at the last position of the object
-
                         size_of_dV = math.sqrt(object_data_base[j, 13]**2 + object_data_base[j, 14]**2)
                         pure_dist = math.sqrt(dist_between)
 
@@ -420,6 +430,7 @@ if __name__ == '__main__':
         # output for drawing bound boxes
         output = torch.cat((output, obj_flag), 1)
 
+        track_result(output, frame_num)
         # draw bound box in original image
         list(map(lambda x: write_(x, curr_img), output))
         list(map(lambda x: write_track(x, curr_img), object_data_base))
@@ -448,5 +459,7 @@ if __name__ == '__main__':
     print("done!! ")
     print("Total-elapsed time: " + str(end - initial_start))
 
+    result_file.write("#," + str(object_data_base.shape[0]))
+    result_file.flush()
     result_file.close()
 

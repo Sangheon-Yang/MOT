@@ -21,7 +21,6 @@ def arg_parse():
 
 
 def write_result(x, img):
-    print(x)
     write_object = x[0]
     id = int(float(write_object[1]))
 
@@ -115,14 +114,13 @@ def compare_results(track_result, MOT_result, threshold):
     for i in range(1, track_result.__len__()):
         matching_result.append([])
         result = 0
-        GT_object_count = 0
+        GT_object_count = MOT_result[i].__len__()
 
         # MOT object loop
         for track_object in track_result[i]:
             # track object loop
             max_iou = 0
             max_iou_object = None
-            GT_object_count = MOT_result.__len__()
 
             for MOT_object in MOT_result[i]:
                 xA = max(float(MOT_object[2]), float(track_object[2]))
@@ -130,7 +128,7 @@ def compare_results(track_result, MOT_result, threshold):
                 xB = min(float(MOT_object[4]), float(track_object[4]))
                 yB = min(float(MOT_object[5]), float(track_object[5]))
 
-                interArea = max(0, xB - xA)*max(0, yB - yA)
+                interArea = max(0, xB - xA) * max(0, yB - yA)
 
                 if interArea == 0:
                     continue
@@ -149,10 +147,13 @@ def compare_results(track_result, MOT_result, threshold):
                 matching_result[i - 1].append([max_iou_object, track_object])
                 MOT_result[i].remove(max_iou_object)
 
+                iou_table[int(max_iou_object[1])][i][0] = int(float(track_object[1]))
+                iou_table[int(max_iou_object[1])][i][1] = max_iou
+
         iou_sum += result / matching_result[i - 1].__len__()
         object_sum += matching_result[i - 1].__len__() / GT_object_count
 
-    print("Average IOU: " + str((iou_sum/matching_result.__len__())*100) + "%")
+    print("Average IOU: " + str((iou_sum / matching_result.__len__())*100) + "%")
     print("Average Detection Object: " + str((object_sum / matching_result.__len__()) * 100) + "%")
 
     return matching_result
@@ -166,6 +167,14 @@ def track_table_result():
         track_table_file.write("\n")
         track_table_file.flush()
 
+# gt_id , frame , track_id , iou
+def iou_table_result():
+    for i in range(iou_table.__len__()):
+        for j in range(iou_table[i].__len__()):
+            iou_table_file.write(str(i) + " " + str(j) + " " + str(iou_table[i][j][0]) + " " + str(iou_table[i][j][1]) + "\n")
+    iou_table_file.close()
+
+path = './train/MOT17-05-DPM/'
 
 if __name__ == '__main__':
 
@@ -203,9 +212,10 @@ if __name__ == '__main__':
     trackFile.close()
 
 ####################### MOT 17 GT Parsing #######################
-    gtFile = open('./MOT17-04-DPM/gt/gt.txt', 'r')
+    gtFile = open(path + 'gt/gt.txt', 'r')
     gt_result = [[]]
     count = curFrame
+    max_gt_id = 0
 
     for frame in range(0, count):
         gt_result.append([])
@@ -224,11 +234,23 @@ if __name__ == '__main__':
 
         converted_line = convert_to_track_array(parsed_line)
         gt_result[int(converted_line[0])].append(converted_line)
+        max_gt_id = int(converted_line[1])
 
     gtFile.close()
 
+    print(path)
 ########################## Compare Result ##########################
+    # GT_id Frame_num Track_id IOU
+    iou_table = [[]]
+    for gt_id in range(1, max_gt_id + 1):
+        iou_table.append([])
+        for frame_num in range(0, count + 1):
+            iou_table[gt_id].append([0, 0])
+
     output_list = compare_results(track_result, gt_result, threshold)
+
+    iou_table_file = open('./MOT_result/iouTable.txt', 'w')
+    iou_table_result()
 
     track_table = torch.zeros(count+1, max_object_id+1, dtype=torch.int)
 
@@ -351,17 +373,28 @@ if __name__ == '__main__':
             result += max_val / id_count
 
     print("Major ID: " + str((result / max_object_id) * 100) + "%")
+
+    kind_of_id = {}
+    for i in range(1, max_object_id + 1):
+        for j in range(1, count + 1):
+            if kind_of_id.__contains__(int(track_table[j, i])):
+                continue
+
+            kind_of_id[int(track_table[j, i])] = 1
+
+    print("Error: " + str(((max_object_id - kind_of_id.__len__()) / kind_of_id.__len__()) * 100) + "%")
+    print("Max ID: " + str(max_object_id) + "   ID 종류: " + str(kind_of_id.__len__()))
 ########################## Write Result ##########################
-    #
-    # for img_id in range(count):
-    #     inp_dim = 416
-    #
-    #     curr_img_num_str = str(img_id + 1).zfill(6) + ".jpg"
-    #     curr_img_path = osp.join(osp.realpath('.'), "./MOT17-04-DPM/img1/", curr_img_num_str)
-    #     processed_img, curr_img, dim = prep_image(curr_img_path, inp_dim)
-    #
-    #     list(map(lambda x: write_result(x, curr_img), output_list[img_id]))
-    #
-    #     # write a new image in destination_path
-    #     det_names = "est_output/est_" + curr_img_num_str
-    #     cv2.imwrite(det_names, curr_img)
+
+    for img_id in range(count):
+        inp_dim = 416
+
+        curr_img_num_str = str(img_id + 1).zfill(6) + ".jpg"
+        curr_img_path = osp.join(osp.realpath('.'), path + "img1/", curr_img_num_str)
+        processed_img, curr_img, dim = prep_image(curr_img_path, inp_dim)
+
+        list(map(lambda x: write_result(x, curr_img), output_list[img_id]))
+
+        # write a new image in destination_path
+        det_names = "est_output/est_" + curr_img_num_str
+        cv2.imwrite(det_names, curr_img)
