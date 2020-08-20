@@ -4,6 +4,8 @@
 /project/**/__pycache__
 /**/trackResult.txt
 /**/MOT_output
+/**/MOT_result
 /**/est_output
 /**/gt_output
 /**/MOT17-*
+/**/chart

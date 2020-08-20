@@ -3,6 +3,8 @@ import cv2
 import os.path as osp
 import numpy as np
 import torch
+import matplotlib
+import matplotlib.pyplot as plt
 from preprocess import prep_image, inp_to_image
 
 colors = [(255, 255, 255), (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255),
@@ -169,12 +171,50 @@ def track_table_result():
 
 # gt_id , frame , track_id , iou
 def iou_table_result():
-    for i in range(iou_table.__len__()):
-        for j in range(iou_table[i].__len__()):
+    chart_color = ['g', 'r', 'b', 'c', 'y', 'm']
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    for i in range(1, iou_table.__len__()):
+        train_id = 0
+        color_id = -1
+        iou_sum = 0
+
+        ax.set_xlabel('Frame')
+        ax.set_ylabel('IOU')
+        ax.axis([0, iou_table[i].__len__(), 0, 1])
+
+        for j in range(1, iou_table[i].__len__()):
+            color = 'k'
+
+            if iou_table[i][j][1] != 0:
+                if train_id != iou_table[i][j][0]:
+                    color_id += 1
+                    plt.text(j-1.15, iou_table[i][j][1]+0.03, "{}".format(iou_table[i][j][0]), fontsize=7, color=chart_color[color_id % 6])
+
+                color = chart_color[color_id % 6]
+
+            ax.plot([j-1, j], [iou_table[i][j-1][1], iou_table[i][j][1]], '-', color=color)
+            ax.plot([j], [iou_table[i][j][1]], 'o', color=color, markersize=4)
+
+            if iou_table[i][j][0] != 0:
+                train_id = iou_table[i][j][0]
+
+            iou_sum += iou_table[i][j][1]
             iou_table_file.write(str(i) + " " + str(j) + " " + str(iou_table[i][j][0]) + " " + str(iou_table[i][j][1]) + "\n")
+
+        iou_sum /= iou_table[i].__len__()
+        fig.suptitle(path.split('/')[2])
+        ax.set_title("GT_ID : " + str(i) + "    /    IOU : " + str(round(iou_sum, 2)))
+
+        if iou_sum != 0:
+            plt.savefig("./chart/fig" + str(i) + ".png", dpi=300)
+        plt.cla()
+
+
     iou_table_file.close()
 
-path = './train/MOT17-05-DPM/'
+path = './train/MOT17-04-DPM/'
 
 if __name__ == '__main__':
 
@@ -248,7 +288,6 @@ if __name__ == '__main__':
             iou_table[gt_id].append([0, 0])
 
     output_list = compare_results(track_result, gt_result, threshold)
-
     iou_table_file = open('./MOT_result/iouTable.txt', 'w')
     iou_table_result()
 
