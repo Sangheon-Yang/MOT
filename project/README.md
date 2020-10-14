@@ -11,60 +11,20 @@ Installation
 How To Execute
 ================
 
-Version 01
-----------
 **[ for sequential images ]**
 - ```python trackMOT.py --images 'PATH_TO_IMG_DIRECTORY' --det 'PATH_TO_DESTINATION' --count 'THE_NUMBER_OF_IMGS'```
-- ex )   ```python trackMOT.py --images ./MOT17-03-DPM/img1/ --det MOT_output --count 300```
-
-**[ for video file ]**
-- ```python trackVideo.py --video 'PATH_TO_VIDEOFILE'```
-- ex ) ```python trackMOT.py --video ./sq.mp4```
-
-**[ for camera capture ]**
-- ```python trackVideo.py --camera True```
-
-Version 02
-----------
-
-**[ for sequential images ]**
-- ```python trackMOT_4.py --images 'PATH_TO_IMG_DIRECTORY' --det 'PATH_TO_DESTINATION' --count 'THE_NUMBER_OF_IMGS'```
-- ex )   ```python trackMOT_4.py --images ./MOT17-03-DPM/img1/ --det MOT_output --count 300```
+- ex )   ```python FINAL_trackMOT_**version#**.py --images ./MOT17-03-DPM/img1/ --det MOT_output --count 300```
 
 
-Network & Weights & Classes used for Object Detection
-===============
-
-- Network : yolov3.cfg 
-- Weights : yolov3.weights
-- classes : coco.names ( total 80 classes exist : 'person', 'bicycle', 'car', 'motorbike' ... etc )
-
-
-About Object Detection
-================
-- Objects are classified to total 80 classes (can fix it to lower number by editing main function)
-- The Result of Object-detection in a frame is a PyTorch Tensor with (```n```, 8 ) dimension, ```n``` is the number of Detected-Objects
-- The Result of Object-detection contains the information of 4-point of (x,y) coordinate position, confidence, class
-- We edited the Result of Object-detection format to  (```n```, 9 ) dimension adding ```Object_id``` and changing the 4-point of (x,y) coordinate position to mid-point, width, height coordinate in order to make it easier to compare objects' location and check whether Tracking is well performing. 
-
-
-Tracking Algorithm
-=================
-
-- [**Version_01 : Simple Tracker that considers only One-Previous-Frame's detection**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-01)
-
-- [**Version_01.1 : Tracker that considers only One-Latest-Locations of Detected Objects**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-01.1)
-
-- [**Version_02 : Tracker that considers maximum 6-Latest-Locations of Detected Objects for Estimating Directions and Next-Locations**](https://github.com/Sangheon-Yang/MOT/wiki/Implementation-Version-02)
-
-
-Further Step
-==============
-
-Quantitative evaluation and Qualitative evaluation are needed. 
-
-The Standard Measurement of those evaluations should be established as soon as possible.
-
+Details
+========
+- [wiki home](https://github.com/Sangheon-Yang/MOT/wiki)
+- [Overall Abstract & Implementation Summary (Object Detection)](https://github.com/Sangheon-Yang/MOT/wiki/01.-Overall-Abstract-&-Implementation-Summary-(Object-Detection))
+- [Details in Version 01](https://github.com/Sangheon-Yang/MOT/wiki/02.-Details-in-Version-01)
+- [Details in Version 01.1 & 01.2](https://github.com/Sangheon-Yang/MOT/wiki/03.-Details-in-Version-01.1-&-01.2)
+- [Details in Version 02 & 02.1](https://github.com/Sangheon-Yang/MOT/wiki/04.-Details-in-Version-02-&-02.1)
+- [Tracking Performance Evaluation](https://github.com/Sangheon-Yang/MOT/wiki/05.-Tracking-Performance-Evaluation)
+- [Result Analysis](https://github.com/Sangheon-Yang/MOT/wiki/06.-Result-Analysis)
 
 
 
