@@ -460,7 +460,7 @@ if __name__ == '__main__':
     print("done!! ")
     print("Total-elapsed time: " + str(end - initial_start))
 
-    result_file.write("#,"+str(object_data_base.shape[0]))
+    result_file.write("#,"+str(obj_id))
     result_file.flush()
     result_file.close()
 

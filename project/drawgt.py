@@ -4,9 +4,7 @@ import numpy as np
 import torch
 from preprocess import prep_image, inp_to_image
 
-colors = [(255, 255, 255), (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255),
-          (200, 100, 100), (100, 100, 200), (100, 200, 100), (200, 200, 100), (200, 100, 200), (100, 200, 200),
-          (100, 100, 100)]
+colors = [(255, 255, 255), (255, 100, 100), (0, 255, 0), (110, 110, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255), (255, 255, 150), (255, 150, 255), (150, 255, 255), (150, 255, 150), (150, 150, 255), (255, 150, 150), (150, 150, 150)]
 
 def write_(x, img):
     track_object = torch.from_numpy(np.array([float(x[0]), float(x[1]), float(x[2]), float(x[3]), float(x[4]), float(x[5])]))
@@ -32,12 +30,12 @@ def convert_to_drawPoint(line):
     parsedLine = [line[0], line[1], line[2], line[3], rightPointX, rightPointY]
     return parsedLine
 
-path = './train/MOT17-11-DPM/'
+path = './train/MOT17-04-DPM/'
 
 if __name__ == '__main__':
     gtFile = open(path + 'gt/gt.txt', 'r')
     gt_result = [[]]
-    images = 100
+    images = 1050
 
     for frame in range(0, images):
         gt_result.append([])

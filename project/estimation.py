@@ -152,8 +152,9 @@ def compare_results(track_result, MOT_result, threshold):
                 iou_table[int(max_iou_object[1])][i][0] = int(float(track_object[1]))
                 iou_table[int(max_iou_object[1])][i][1] = max_iou
 
-        iou_sum += result / matching_result[i - 1].__len__()
-        object_sum += matching_result[i - 1].__len__() / GT_object_count
+        if matching_result[i - 1].__len__() != 0:
+            iou_sum += result / matching_result[i - 1].__len__()
+            object_sum += matching_result[i - 1].__len__() / GT_object_count
 
     print("Average IOU: " + str((iou_sum / matching_result.__len__())*100) + "%")
     print("Average Detection Object: " + str((object_sum / matching_result.__len__()) * 100) + "%")
@@ -214,7 +215,7 @@ def iou_table_result():
 
     iou_table_file.close()
 
-path = './train/MOT17-04-DPM/'
+path = './train/MOT17-05-DPM/'
 
 if __name__ == '__main__':
 
@@ -425,15 +426,15 @@ if __name__ == '__main__':
     print("Max ID: " + str(max_object_id) + "   ID 종류: " + str(kind_of_id.__len__()))
 ########################## Write Result ##########################
 
-    for img_id in range(count):
-        inp_dim = 416
-
-        curr_img_num_str = str(img_id + 1).zfill(6) + ".jpg"
-        curr_img_path = osp.join(osp.realpath('.'), path + "img1/", curr_img_num_str)
-        processed_img, curr_img, dim = prep_image(curr_img_path, inp_dim)
-
-        list(map(lambda x: write_result(x, curr_img), output_list[img_id]))
-
-        # write a new image in destination_path
-        det_names = "est_output/est_" + curr_img_num_str
-        cv2.imwrite(det_names, curr_img)
+    # for img_id in range(count):
+    #     inp_dim = 416
+    #
+    #     curr_img_num_str = str(img_id + 1).zfill(6) + ".jpg"
+    #     curr_img_path = osp.join(osp.realpath('.'), path + "img1/", curr_img_num_str)
+    #     processed_img, curr_img, dim = prep_image(curr_img_path, inp_dim)
+    #
+    #     list(map(lambda x: write_result(x, curr_img), output_list[img_id]))
+    #
+    #     # write a new image in destination_path
+    #     det_names = "est_output/est_" + curr_img_num_str
+    #     cv2.imwrite(det_names, curr_img)

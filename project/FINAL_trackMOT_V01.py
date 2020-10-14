@@ -114,11 +114,11 @@ def track_result(frame, file, frame_no):
 
     while line_count < line.__len__():
         output_line = str(frame_no+1) + ","
+        output_line += str(line[line_count][8]) + ","
         output_line += str(line[line_count][1]) + ","
         output_line += str(line[line_count][2]) + ","
-        output_line += str(line[line_count][3]) + ","
-        output_line += str(line[line_count][4]) + ","
-        output_line += str(line[line_count][8]) + "\n"
+        output_line += str(float(line[line_count][3]) - float(line[line_count][1])) + ","
+        output_line += str(float(line[line_count][4]) - float(line[line_count][2])) + "\n"
         file.write(output_line)
         line_count += 1
 
@@ -293,7 +293,7 @@ if __name__ ==  '__main__':
         # output for drawing bound boxes
         output = torch.cat((output, obj_flag), 1)
 
-        track_result(output_w_mid_coord, result_file, img_id)
+        track_result(output, result_file, img_id)
         # draw bound box in original image
         list(map(lambda x: write_(x, curr_img), output))
 
@@ -322,5 +322,6 @@ if __name__ ==  '__main__':
     print("done!! ")
     print("Total-elapsed time: " + str(end - initial_start))
 
+    result_file.write("#," + str(obj_id))
+    result_file.flush()
     result_file.close()
-    
